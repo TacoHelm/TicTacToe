@@ -1,0 +1,13 @@
+: {
+    box-sizing: border-box;
+}
+
+.container {
+    display: grid;
+    grid-template: repeat(3, 96px) / repeat(3, 96px);
+    margin: 20px;
+}
+
+.field {
+    border: 1px solid grey;
+}

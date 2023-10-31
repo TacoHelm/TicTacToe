@@ -27,8 +27,8 @@ Assignment
 // Gameboard object
 const gameBoard = (function () {
     let board = [];
-    const setField = (field, status) => board[field] = status;  // 0 = Empty, 1 = Player 1, 2 = Player 2
-    const getField = (field) => board[field];
+    const setField = (number, status) => board[number] = status;  // 0 = Empty, 1 = Player 1, 2 = Player 2
+    const getField = (number) => board[number];
     const checkForWinner = () => {  // return winner // 0 = no winner, 1 = Player 1, 2 = Player 2
         const threeRow = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 7]];
         for (obj in threeRow) {
@@ -51,5 +51,18 @@ const gameFlow = (function () {
 })();
 
 // Player objects
+
+const display = (function (){
+    const fields = document.querySelectorAll(".field"); 
+
+    const field = (number, status) => {
+        if (status == 0) fields[number].innerHTML ='';
+        if (status == 1) fields[number].innerHTML ='<img src="./Images/circle.svg"></img>';
+        if (status == 2) fields[number].innerHTML ='<img src="./Images/x.svg"></img>';
+
+    }
+    return {field};
+})();
+
 
 // Display object
