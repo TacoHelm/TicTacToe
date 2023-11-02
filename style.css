@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 
-.container {
+.board {
     display: grid;
     grid-template: repeat(3, 96px) / repeat(3, 96px);
     margin: 20px;

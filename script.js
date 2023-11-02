@@ -57,9 +57,10 @@ const gameBoard = (function () {
 
 // gameflow object
 const gameFlow = (function () {
-    let currentPlayer = 1;
+    let currentPlayer = 1; // 1 = Player 1 2 = Player 2
+    let gameStop = false;
     const turn = (number) => {      // executes after click on field
-        if (gameBoard.getField(number) == 0){
+        if (gameBoard.getField(number) == 0 && gameStop == false){
             gameBoard.setField(number, currentPlayer);
             display.field(number, currentPlayer);
             gameFlow.switchPlayer();
@@ -79,6 +80,8 @@ const gameFlow = (function () {
     }
     const endGame = (winningPlayer) => {
         console.log(winningPlayer);
+        gameStop = true;
+        
     }
 
     return {turn, switchPlayer, endGame};
@@ -98,5 +101,6 @@ const display = (function (){
         if (status == 1) fields[number].innerHTML =`<img class="${number}" src="./Images/circle.svg"></img>`;
         if (status == 2) fields[number].innerHTML =`<img class="${number}" src="./Images/x.svg"></img>`;
     }
+
     return {field};
 })();
