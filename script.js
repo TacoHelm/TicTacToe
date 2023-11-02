@@ -22,24 +22,35 @@ Assignment
 
 */
 
+// Tie
+// End game
 
 
 // Gameboard object
 const gameBoard = (function () {
-    let board = [];
+    let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
     const setField = (number, status) => {
         board[number] = status;  // 0 = Empty, 1 = Player 1, 2 = Player 2
-        }
-    const getField = (number) => board[number];
+    }
+    const getField = (number) => {
+        return board[number];
+    }
     const checkForWinner = () => {  // return winner // 0 = no winner, 1 = Player 1, 2 = Player 2
-        const threeRow = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 7]];
+        const threeRow = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         for (obj in threeRow) {
             if ((board[threeRow[obj][0]] == 1) && (board[threeRow[obj][1]] == 1) && (board[threeRow[obj][2]] == 1)) gameFlow.endGame(1);
             if ((board[threeRow[obj][0]] == 2) && (board[threeRow[obj][1]] == 2) && (board[threeRow[obj][2]] == 2)) gameFlow.endGame(2);
-        }
-        return;
+            }
     }
-    return {setField, getField, checkForWinner};
+    const checkForTie = () => {
+        let emptyFields = 0;
+        for (obj in board) {
+            if (board[obj] == 0) emptyFields++
+            }
+        if (emptyFields == 0) gameFlow.endGame('tie');
+    }
+    return {setField, getField, checkForWinner, checkForTie};
 })();
 
 
@@ -48,10 +59,13 @@ const gameBoard = (function () {
 const gameFlow = (function () {
     let currentPlayer = 1;
     const turn = (number) => {      // executes after click on field
-        gameBoard.setField(number, currentPlayer);
-        display.field(number, currentPlayer);
-        gameFlow.switchPlayer();
-        gameBoard.checkForWinner();
+        if (gameBoard.getField(number) == 0){
+            gameBoard.setField(number, currentPlayer);
+            display.field(number, currentPlayer);
+            gameFlow.switchPlayer();
+            gameBoard.checkForWinner();
+            gameBoard.checkForTie();
+        }
     }
     const switchPlayer = () => {
         switch (currentPlayer) {
@@ -64,8 +78,7 @@ const gameFlow = (function () {
         }
     }
     const endGame = (winningPlayer) => {
-        console.log(`Player ${winningPlayer} won!`)
-
+        console.log(winningPlayer);
     }
 
     return {turn, switchPlayer, endGame};
@@ -78,7 +91,7 @@ const gameFlow = (function () {
 const display = (function (){
     const fields = document.querySelectorAll(".field"); 
     for (i = 0; i < fields.length; i++) {
-        fields[i].addEventListener('click', (e) =>gameFlow.turn(e.target.classList[0]));
+        fields[i].addEventListener('click', (e) => gameFlow.turn(e.target.classList[0]));
     }
     const field = (number, status) => {
         if (status == 0) fields[number].innerHTML ='';
@@ -87,6 +100,3 @@ const display = (function (){
     }
     return {field};
 })();
-
-
-// Display object
