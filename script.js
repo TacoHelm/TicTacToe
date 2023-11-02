@@ -27,39 +27,63 @@ Assignment
 // Gameboard object
 const gameBoard = (function () {
     let board = [];
-    const setField = (number, status) => board[number] = status;  // 0 = Empty, 1 = Player 1, 2 = Player 2
+    const setField = (number, status) => {
+        board[number] = status;  // 0 = Empty, 1 = Player 1, 2 = Player 2
+        }
     const getField = (number) => board[number];
     const checkForWinner = () => {  // return winner // 0 = no winner, 1 = Player 1, 2 = Player 2
         const threeRow = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 7]];
         for (obj in threeRow) {
-            console.log(board[threeRow[obj][0]]);
-            if ((board[threeRow[obj][0]] == 1) && (board[threeRow[obj][1]] == 1) && (board[threeRow[obj][2]] == 1)) return 1;
-            if ((board[threeRow[obj][0]] == 2) && (board[threeRow[obj][1]] == 2) && (board[threeRow[obj][2]] == 2)) return 2;
+            if ((board[threeRow[obj][0]] == 1) && (board[threeRow[obj][1]] == 1) && (board[threeRow[obj][2]] == 1)) gameFlow.endGame(1);
+            if ((board[threeRow[obj][0]] == 2) && (board[threeRow[obj][1]] == 2) && (board[threeRow[obj][2]] == 2)) gameFlow.endGame(2);
         }
-        return 0;
+        return;
     }
     return {setField, getField, checkForWinner};
 })();
 
 
 
-// Gameflow object
+// gameflow object
 const gameFlow = (function () {
-    // start
-    // turn 
-    // end
+    let currentPlayer = 1;
+    const turn = (number) => {      // executes after click on field
+        gameBoard.setField(number, currentPlayer);
+        display.field(number, currentPlayer);
+        gameFlow.switchPlayer();
+        gameBoard.checkForWinner();
+    }
+    const switchPlayer = () => {
+        switch (currentPlayer) {
+            case 1:
+            currentPlayer = 2;
+            break;
+            case 2:
+            currentPlayer = 1;
+            break;
+        }
+    }
+    const endGame = (winningPlayer) => {
+        console.log(`Player ${winningPlayer} won!`)
+
+    }
+
+    return {turn, switchPlayer, endGame};
 })();
 
 // Player objects
 
+// Display object
+
 const display = (function (){
     const fields = document.querySelectorAll(".field"); 
-
+    for (i = 0; i < fields.length; i++) {
+        fields[i].addEventListener('click', (e) =>gameFlow.turn(e.target.classList[0]));
+    }
     const field = (number, status) => {
         if (status == 0) fields[number].innerHTML ='';
-        if (status == 1) fields[number].innerHTML ='<img src="./Images/circle.svg"></img>';
-        if (status == 2) fields[number].innerHTML ='<img src="./Images/x.svg"></img>';
-
+        if (status == 1) fields[number].innerHTML =`<img class="${number}" src="./Images/circle.svg"></img>`;
+        if (status == 2) fields[number].innerHTML =`<img class="${number}" src="./Images/x.svg"></img>`;
     }
     return {field};
 })();
