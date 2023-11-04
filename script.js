@@ -28,9 +28,15 @@ const gameBoard = (function () {
     const checkForWinner = () => {  // return winner // 0 = no winner, 1 = Player 1, 2 = Player 2
         const threeRow = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         for (obj in threeRow) {
-            if ((board[threeRow[obj][0]] == 1) && (board[threeRow[obj][1]] == 1) && (board[threeRow[obj][2]] == 1)) gameFlow.endGame(1);
-            if ((board[threeRow[obj][0]] == 2) && (board[threeRow[obj][1]] == 2) && (board[threeRow[obj][2]] == 2)) gameFlow.endGame(2);
+            if ((board[threeRow[obj][0]] == 1) && (board[threeRow[obj][1]] == 1) && (board[threeRow[obj][2]] == 1)) {
+                players[1].addScore();
+                gameFlow.newRound();
             }
+            if ((board[threeRow[obj][0]] == 2) && (board[threeRow[obj][1]] == 2) && (board[threeRow[obj][2]] == 2)) {
+                players[2].addScore();
+                gameFlow.newRound();
+            }
+        }
     }
     const checkForTie = () => {
         let emptyFields = 0;
@@ -39,7 +45,14 @@ const gameBoard = (function () {
             }
         if (emptyFields == 0) gameFlow.endGame('tie');
     }
-    return {setField, getField, checkForWinner, checkForTie};
+
+    const clear = () => {
+        board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (obj in board) {
+            display.field(obj, board[obj]);
+        }
+    }
+    return {setField, getField, checkForWinner, checkForTie, clear};
 })();
 
 
@@ -48,9 +61,11 @@ const gameBoard = (function () {
 const gameFlow = (function () {
     let currentPlayer = 1; // 1 = Player 1 2 = Player 2
     let gameStop = true; // false = gameFlow.turn active true = .turn deactivated
+    let rounds = 5;
     
     const startGame = () => {
-        console.log(playerOne);
+        players[1].setName(display.getName(1));
+        //players[2].setName(display.getName(2));
         gameStop = false;
     }
     
@@ -75,19 +90,25 @@ const gameFlow = (function () {
             break;
         }
     }
+
+    const newRound = () => {
+        gameBoard.clear();
+        if (players[1].getScore() == 5) gameFlow.endGame(1);
+        if (players[2].getScore() == 5) gameFlow.endGame(2);
+    } 
+
     const endGame = (winningPlayer) => {
-        display.message(`Player ${winningPlayer} wins the game!`);
+        display.setMessage(`Player ${winningPlayer} wins the game!`);
         gameStop = true;
         
     }
 
-    return {startGame, turn, switchPlayer, endGame};
+    return {startGame, turn, switchPlayer, endGame, newRound};
 })();
 
 // Player object
 
-const playerOne = createPlayer("Player 1", 1);
-const playerTwo = createPlayer("Player 2", 2);
+const players = [0, createPlayer("Player 1", 1), createPlayer("Player 2", 2),];
 
 function createPlayer(name, number) {
     let score = 0;
@@ -95,9 +116,11 @@ function createPlayer(name, number) {
         name = input;
         display.name(name, number);
     }
-    console.log(name, score);
     const getName = () => name;
-    const addScore = () => score++;
+    const addScore = () => {
+        score++;
+        display.setScores();
+        };
     const getScore = () => score;
     const resetScore = () => score = 0;
     return {setName, getName, addScore, getScore, resetScore}
@@ -109,6 +132,9 @@ function createPlayer(name, number) {
 
 const display = (function (){
     const fields = document.querySelectorAll(".field"); 
+    const message = document.querySelector(".message");
+    const score = document.querySelectorAll(".score");
+
     for (i = 0; i < fields.length; i++) {
         fields[i].addEventListener('click', (e) => gameFlow.turn(e.target.classList[0]));
     }
@@ -118,15 +144,34 @@ const display = (function (){
         if (status == 2) fields[number].innerHTML =`<img class="${number}" src="./Images/x.svg"></img>`;
     }
 
-    const message = (text) => {
-        document.querySelector(".message").innerHTML = text;
+    const setMessage = (text) => {
+        message.innerHTML = text;
     }
 
-    const name = (name, number) => {
-        console.log(name, number);
-        document.querySelector(`.name${number}`).textContent = name;
+    const name = (name, player) => {
+        document.querySelector(`.name${player}`).textContent = name;
     }
-    return {field, message, name};
+    const getName = (player) => {
+        message.innerHTML = '<form action="script.js" method="post"><label for="name">Name:</label><input type="text" id="name" name="name"><button type="submit" class="submitName">Done</button></form>'
+        document.querySelector(".submitName").addEventListener('click', (event) =>{
+            event.preventDefault();
+            players[player].setName(event.target.form[0].value); 
+        
+        }); 
+    
+    }
+    const clearMessage = () => {
+        message.innerHTML = "";
+    }
+
+    const setScores = () => {
+        score[0].textContent = players[1].getScore();
+        score[1].textContent = players[2].getScore();
+    }
+   
+
+    return {field, setMessage, name, getName, clearMessage, setScores};
 })();
+
 
 gameFlow.startGame();        // Starts game
