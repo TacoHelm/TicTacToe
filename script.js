@@ -1,18 +1,7 @@
 /*
 Assignment
 
-    Set up your project with HTML, CSS and Javascript files and get the Git repo all set up.
-    You’re going to store the gameboard as an array inside of a Gameboard object, so start there! Your players are also going to be stored in objects, 
-    and you’re probably going to want an object to control the flow of the game itself.
-        Your main goal here is to have as little global code as possible. Try tucking everything away inside of a module or factory. Rule of thumb: 
-        if you only ever need ONE of something (gameBoard, displayController), use a module. If you need multiples of something (players!), create them with factories.
-    Set up your HTML and write a JavaScript function that will render the contents of the gameboard array to the webpage (for now you can just manually 
-        fill in the array with "X"s and "O"s)
-    Build the functions that allow players to add marks to a specific spot on the board, and then tie it to the DOM, letting players click on the gameboard to place 
-    their marker. Don’t forget the logic that keeps players from playing in spots that are already taken!
-        Think carefully about where each bit of logic should reside. Each little piece of functionality should be able to fit in the game, player or gameboard objects. Take care to put them in “logical” places. Spending a little time brainstorming here can make your life much easier later!
-        If you’re having trouble, Building a house from the inside out is a great article that lays out a highly applicable example of how you might organize your code for this project.
-    Build the logic that checks for when the game is over! Should check for 3-in-a-row and a tie.
+
     Clean up the interface to allow players to put in their names, include a button to start/restart the game and add a display element that 
     congratulates the winning player!
     Optional - If you’re feeling ambitious create an AI so that a player can play against the computer!
@@ -22,8 +11,8 @@ Assignment
 
 */
 
-// Tie
-// End game
+// Meerdere rondes
+// Namen spelers
 
 
 // Gameboard object
@@ -58,16 +47,24 @@ const gameBoard = (function () {
 // gameflow object
 const gameFlow = (function () {
     let currentPlayer = 1; // 1 = Player 1 2 = Player 2
-    let gameStop = false;
+    let gameStop = true; // false = gameFlow.turn active true = .turn deactivated
+    
+    const startGame = () => {
+        console.log(playerOne);
+        gameStop = false;
+    }
+    
     const turn = (number) => {      // executes after click on field
         if (gameBoard.getField(number) == 0 && gameStop == false){
             gameBoard.setField(number, currentPlayer);
             display.field(number, currentPlayer);
             gameFlow.switchPlayer();
             gameBoard.checkForWinner();
+            if (gameStop == true) return;
             gameBoard.checkForTie();
         }
     }
+    
     const switchPlayer = () => {
         switch (currentPlayer) {
             case 1:
@@ -79,15 +76,34 @@ const gameFlow = (function () {
         }
     }
     const endGame = (winningPlayer) => {
-        console.log(winningPlayer);
+        display.message(`Player ${winningPlayer} wins the game!`);
         gameStop = true;
         
     }
 
-    return {turn, switchPlayer, endGame};
+    return {startGame, turn, switchPlayer, endGame};
 })();
 
-// Player objects
+// Player object
+
+const playerOne = createPlayer("Player 1", 1);
+const playerTwo = createPlayer("Player 2", 2);
+
+function createPlayer(name, number) {
+    let score = 0;
+    const setName = (input) => {
+        name = input;
+        display.name(name, number);
+    }
+    console.log(name, score);
+    const getName = () => name;
+    const addScore = () => score++;
+    const getScore = () => score;
+    const resetScore = () => score = 0;
+    return {setName, getName, addScore, getScore, resetScore}
+}
+
+
 
 // Display object
 
@@ -102,5 +118,15 @@ const display = (function (){
         if (status == 2) fields[number].innerHTML =`<img class="${number}" src="./Images/x.svg"></img>`;
     }
 
-    return {field};
+    const message = (text) => {
+        document.querySelector(".message").innerHTML = text;
+    }
+
+    const name = (name, number) => {
+        console.log(name, number);
+        document.querySelector(`.name${number}`).textContent = name;
+    }
+    return {field, message, name};
 })();
+
+gameFlow.startGame();        // Starts game
